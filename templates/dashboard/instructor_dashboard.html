@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Instructor Dashboard — Skill Jobs Training{% endblock %}
+
+{% block content %}
+<section class="py-10 min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- Header -->
+        <div class="mb-10">
+            <h1 class="text-4xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                Instructor Dashboard
+            </h1>
+            <p class="text-slate-500 mt-2">Manage your batches and upcoming classes</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-6">
+
+            <!-- Assigned Batches -->
+            <div class="bg-white rounded-2xl shadow-md p-6 hover:shadow-xl transition-all duration-300">
+                <h2 class="text-2xl font-bold mb-6">Assigned Batches</h2>
+
+                {% if batches %}
+                <div class="space-y-4">
+                    {% for batch in batches %}
+                    <div class="border border-slate-200 rounded-xl p-5 flex justify-between items-center hover:shadow-md transition-all">
+                        <div>
+                            <h3 class="font-semibold text-slate-800">{{ batch.name }}</h3>
+                            <p class="text-sm text-slate-500 mt-1">
+                                Course: {{ batch.course.title }}
+                            </p>
+                        </div>
+
+                        <a href="{% url 'attendance:attendance_summary' batch_id=batch.id %}"
+                           class="px-4 py-2 rounded-lg text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-500 transition">
+                            View
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-slate-500">You have no assigned batches.</p>
+                {% endif %}
+            </div>
+
+            <!-- Upcoming Classes -->
+            <div class="bg-white rounded-2xl shadow-md p-6 hover:shadow-xl transition-all duration-300">
+                <h2 class="text-2xl font-bold mb-6">Upcoming Classes</h2>
+
+                {% if upcoming_classes %}
+                <div class="space-y-4">
+                    {% for class in upcoming_classes %}
+                    <div class="border border-slate-200 rounded-xl p-5 flex justify-between items-start hover:shadow-md transition-all">
+                        <div>
+                            <h3 class="font-semibold text-slate-800">{{ class.title }}</h3>
+                            <p class="text-slate-500 text-sm mt-1">
+                                {{ class.batch.course.title }} — 
+                                {{ class.scheduled_date }} at {{ class.scheduled_time }}
+                            </p>
+                        </div>
+
+                        <a href="{% url 'attendance:mark_attendance' class_id=class.id %}"
+                           class="px-4 py-2 rounded-lg font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:scale-105 transition-all duration-200">
+                            Mark
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-slate-500">No upcoming classes scheduled.</p>
+                {% endif %}
+            </div>
+
+        </div>
+
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,188 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}Import Enrollments via CSV{% endblock %}
+
+{% block content %}
+<style>
+  .import-wrapper {
+    max-width: 680px;
+    margin: 0 auto;
+  }
+  .import-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 32px 36px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  }
+  .import-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #111827;
+    margin-bottom: 6px;
+  }
+  .import-subtitle {
+    font-size: 13px;
+    color: #6b7280;
+    margin-bottom: 28px;
+  }
+  .import-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 6px;
+  }
+  .import-file-input {
+    display: block;
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px dashed #d1d5db;
+    border-radius: 8px;
+    background: #f9fafb;
+    font-size: 13px;
+    color: #374151;
+    cursor: pointer;
+    transition: border-color .15s;
+    margin-bottom: 24px;
+  }
+  .import-file-input:hover { border-color: #3b82f6; }
+  .import-submit {
+    background: #3b82f6;
+    color: #fff;
+    border: none;
+    padding: 10px 28px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .import-submit:hover { background: #2563eb; }
+  .import-cancel {
+    display: inline-block;
+    margin-left: 14px;
+    font-size: 13px;
+    color: #6b7280;
+    text-decoration: none;
+  }
+  .import-cancel:hover { color: #374151; }
+  .spec-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 28px;
+    font-size: 13px;
+  }
+  .spec-table th {
+    background: #f3f4f6;
+    text-align: left;
+    padding: 8px 12px;
+    font-weight: 700;
+    color: #374151;
+    border: 1px solid #e5e7eb;
+  }
+  .spec-table td {
+    padding: 8px 12px;
+    border: 1px solid #e5e7eb;
+    color: #4b5563;
+    vertical-align: top;
+  }
+  .spec-table tr:nth-child(even) td { background: #f9fafb; }
+  .badge-req {
+    display: inline-block;
+    background: #fee2e2;
+    color: #dc2626;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+  }
+  .badge-opt {
+    display: inline-block;
+    background: #dbeafe;
+    color: #2563eb;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+  }
+  .note-box {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-top: 20px;
+    font-size: 12px;
+    color: #78350f;
+    line-height: 1.6;
+  }
+</style>
+
+<div class="import-wrapper">
+  <div class="import-card">
+    <div class="import-title">&#8593; Import Enrollments via CSV</div>
+    <div class="import-subtitle">
+      Upload a CSV file to bulk-create enrollment records. Duplicates (same student &amp; batch) are silently skipped.
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <label class="import-label" for="csv_file">Select CSV file</label>
+      <input
+        class="import-file-input"
+        type="file"
+        id="csv_file"
+        name="csv_file"
+        accept=".csv"
+        required
+      >
+      <button class="import-submit" type="submit">Upload &amp; Import</button>
+      <a class="import-cancel" href="{% url 'admin:enrollments_salesrecord_changelist' %}">&#8592; Cancel</a>
+    </form>
+
+    <table class="spec-table">
+      <thead>
+        <tr>
+          <th>Column</th>
+          <th>Required?</th>
+          <th>Description</th>
+          <th>Example</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>student_email</code></td>
+          <td><span class="badge-req">Required</span></td>
+          <td>Email address of an existing student account</td>
+          <td>jane@example.com</td>
+        </tr>
+        <tr>
+          <td><code>batch_id</code></td>
+          <td><span class="badge-req">Required</span></td>
+          <td>Numeric ID of the target batch (visible in the Batches list)</td>
+          <td>12</td>
+        </tr>
+        <tr>
+          <td><code>status</code></td>
+          <td><span class="badge-opt">Optional</span></td>
+          <td>One of: <code>pending</code>, <code>approved</code>, <code>rejected</code>. Defaults to <code>pending</code>.</td>
+          <td>approved</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="note-box">
+      <strong>&#9888; Notes</strong><br>
+      • Company admins can only import into batches that belong to their own company.<br>
+      • The file must be saved as UTF-8 CSV (use "Save as CSV UTF-8" in Excel).<br>
+      • The first row must be a header row with column names exactly as listed above.<br>
+      • Rows with unknown student emails or inaccessible batch IDs are counted as errors.
+    </div>
+  </div>
+</div>
+{% endblock %}

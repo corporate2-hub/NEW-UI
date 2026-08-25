@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}Available Exams - {{ company.name }}{% endblock %}
+{% block meta_description %}Browse available exams to test your knowledge and track your learning progress with timed assessments.{% endblock %}
+{% block meta_keywords %}{{ company.meta_keywords|default:"online exams, assessments, skill tests, mock tests" }}{% endblock %}
+{% block canonical_url %}{{ request.build_absolute_uri }}{% endblock %}
+{% block og_type %}website{% endblock %}
+{% block og_title %}Available Exams - {{ company.name|default:"Skill Jobs Training" }}{% endblock %}
+{% block og_description %}Choose from available exams and evaluate your skills with structured assessments.{% endblock %}
+{% block og_url %}{{ request.build_absolute_uri }}{% endblock %}
+{% block og_image %}{% if company.og_image %}{{ company.og_image.url }}{% elif company.feature_image %}{{ company.feature_image.url }}{% endif %}{% endblock %}
+{% block twitter_title %}Available Exams - {{ company.name|default:"Skill Jobs Training" }}{% endblock %}
+{% block twitter_description %}Take timed exams and measure your progress in practical subjects.{% endblock %}
+{% block twitter_image %}{% if company.og_image %}{{ company.og_image.url }}{% elif company.feature_image %}{{ company.feature_image.url }}{% endif %}{% endblock %}
+{% block geo_meta %}
+<meta name="geo.placename" content="{{ company.name|default:'Skill Jobs Training' }}">
+<meta name="distribution" content="global">
+{% endblock %}
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "Available Exams - {{ company.name|default:'Skill Jobs Training'|escapejs }}",
+  "description": "List of available exams to assess knowledge and readiness.",
+  "url": "{{ request.build_absolute_uri }}"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "Exam Listings",
+  "numberOfItems": {{ exams|length }},
+  "itemListElement": [
+    {% for exam in exams %}
+    {
+      "@type": "ListItem",
+      "position": {{ forloop.counter }},
+      "url": "{{ request.scheme }}://{{ request.get_host }}{% url 'exams:take_exam' exam.id %}",
+      "name": "{{ exam.title|escapejs }}"
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<section class="py-12 bg-slate-50 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="mb-10 text-center">
+            <h1 class="text-3xl md:text-4xl font-black text-slate-900 mb-4">Available Exams</h1>
+            <p class="text-slate-600 max-w-2xl mx-auto">Select an exam to test your skills and knowledge.</p>
+        </div>
+
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {% for exam in exams %}
+                <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 hover:shadow-xl transition-all duration-300 flex flex-col">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-bold uppercase tracking-wider">
+                            {{ exam.categories.first.name|default:"General" }}
+                        </span>
+                        <div class="flex items-center text-slate-400 text-xs font-medium">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            {{ exam.time_limit_mins }} mins
+                        </div>
+                    </div>
+                    
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">{{ exam.title }}</h3>
+                    <p class="text-slate-600 text-sm mb-6 flex-grow line-clamp-3">
+                        {{ exam.description|default:"Take this exam to evaluate your proficiency." }}
+                    </p>
+
+                    <div class="grid grid-cols-2 gap-4 mb-6 py-4 border-y border-slate-50">
+                        <div class="text-center">
+                            <span class="block text-xl font-black text-slate-900">{{ exam.total_questions }}</span>
+                            <span class="text-[10px] uppercase font-bold text-slate-400 tracking-tight">Questions</span>
+                        </div>
+                        <div class="text-center border-l border-slate-100">
+                            <span class="block text-xl font-black text-slate-900">{{ exam.marks_per_question }}</span>
+                            <span class="text-[10px] uppercase font-bold text-slate-400 tracking-tight">Marks/Q</span>
+                        </div>
+                    </div>
+
+                    <a href="{% url 'exams:take_exam' exam.id %}" class="w-full py-3 rounded-2xl bg-slate-900 text-white font-bold text-center hover:bg-blue-600 transition-colors shadow-lg shadow-slate-200">
+                        Start Exam
+                    </a>
+                </div>
+            {% empty %}
+                <div class="col-span-full py-20 text-center">
+                    <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-slate-100 text-slate-400 mb-4">
+                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900">No exams available</h3>
+                    <p class="text-slate-500">Check back later for new exams from {{ company.name }}.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{% if selected_type == 'i2i' %}I2I Programs{% else %}Courses{% endif %} — {{ company.meta_title|default:company.name|default:"Skill Jobs Training" }}{% endblock %}
+{% block meta_description %}{% if selected_type == 'i2i' %}Browse Intern to Industry (I2I) programs designed to bridge internship experience and professional careers.{% else %}Browse professional training programs with practical projects, mentor support, and career-focused learning paths.{% endif %}{% endblock %}
+{% block meta_keywords %}{{ company.meta_keywords|default:"courses, online training, professional skills, IT courses" }}{% endblock %}
+{% block canonical_url %}{{ request.build_absolute_uri }}{% endblock %}
+{% block og_type %}website{% endblock %}
+{% block og_title %}{% if selected_type == 'i2i' %}I2I Programs{% else %}Courses{% endif %} — {{ company.og_title|default:company.meta_title|default:company.name }}{% endblock %}
+{% block og_description %}{% if selected_type == 'i2i' %}Explore I2I programs that connect interns to real industry careers.{% else %}Find the right program by category, level, and search filters to accelerate your career growth.{% endif %}{% endblock %}
+{% block og_url %}{{ request.build_absolute_uri }}{% endblock %}
+{% block og_image %}{% if company.og_image %}{{ company.og_image.url }}{% endif %}{% endblock %}
+{% block twitter_title %}Courses — {{ company.name|default:"Skill Jobs Training" }}{% endblock %}
+{% block twitter_description %}Explore curated courses with real-world skills and guided learning.{% endblock %}
+{% block twitter_image %}{% if company.og_image %}{{ company.og_image.url }}{% endif %}{% endblock %}
+{% block geo_meta %}
+<meta name="geo.placename" content="{{ company.name|default:'Skill Jobs Training' }}">
+<meta name="distribution" content="global">
+{% endblock %}
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "Courses - {{ company.name|default:'Skill Jobs Training'|escapejs }}",
+  "description": "Browse available training courses by category, level, and interests.",
+  "url": "{{ request.build_absolute_uri }}",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "{{ company.name|default:'Skill Jobs Training'|escapejs }}",
+    "url": "{{ request.scheme }}://{{ request.get_host }}"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "Course Listings",
+  "numberOfItems": {{ page_obj.paginator.count|default:courses|length }},
+  "itemListElement": [
+    {% for course in courses %}
+    {
+      "@type": "ListItem",
+      "position": {{ forloop.counter }},
+      "url": "{{ request.scheme }}://{{ request.get_host }}{% url 'courses:course_detail' course.slug %}",
+      "name": "{{ course.title|escapejs }}"
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .sj-gradient-text{background:linear-gradient(135deg,#0D5B9E,#00AEEF);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    .sj-grid-bg{background-image:linear-gradient(rgba(15,23,42,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(15,23,42,.06) 1px,transparent 1px);background-size:36px 36px}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<section class="relative overflow-hidden bg-white pt-10 pb-12 sm:pt-16 sm:pb-16">
+    
+    {% if selected_type == 'i2i' %}
+    <div class="absolute -left-40 top-10 h-96 w-96 rounded-full bg-brand-primary/10 blur-3xl"></div>
+    <div class="absolute -right-40 top-0 h-96 w-96 rounded-full bg-brand-secondary/10 blur-3xl"></div>
+    {% else %}
+    <div class="absolute -left-40 top-10 h-96 w-96 rounded-full bg-brand-secondary/10 blur-3xl"></div>
+    <div class="absolute -right-40 top-0 h-96 w-96 rounded-full bg-brand-primary/10 blur-3xl"></div>
+    {% endif %}
+
+    <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
+        {% if selected_type == 'i2i' %}
+        <div class="inline-flex items-center gap-2 bg-cyan-50 border border-cyan-200 rounded-full px-4 py-1.5 mb-4 text-xs font-bold text-brand-secondary uppercase tracking-widest">
+            Intern to Industry
+        </div>
+        <h1 class="text-3xl font-black text-slate-950 sm:text-4xl md:text-6xl">
+            Explore <span style="background:linear-gradient(135deg,#0D5B9E,#00AEEF);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;">I2I Programs</span>
+        </h1>
+        <p class="mt-3 text-sm text-slate-600 max-w-2xl mx-auto sm:mt-4 sm:text-base">
+            Industry-immersive programs that bridge the gap between internship experience and professional careers.
+        </p>
+        {% else %}
+        <h1 class="text-3xl font-black text-slate-950 sm:text-4xl md:text-6xl">
+            Explore <span class="sj-gradient-text">Training Programs</span>
+        </h1>
+        <p class="mt-3 text-sm text-slate-600 max-w-2xl mx-auto sm:mt-4 sm:text-base">
+            Learn in-demand skills with structured training, real projects, and expert mentorship.
+        </p>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Filters + Course Grid -->
+<section class="bg-slate-50 py-10 sm:py-16 md:py-20">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
+        <!-- Filter Bar -->
+        <form method="get" class="mb-8 grid grid-cols-2 gap-3 sm:mb-10 sm:gap-4 md:grid-cols-4">
+            {% if selected_type %}<input type="hidden" name="type" value="{{ selected_type }}">{% endif %}
+            <input type="text" name="search"
+                   placeholder="Search programs..."
+                   value="{{ search_query }}"
+                   class="col-span-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-800 shadow-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 md:col-span-1">
+
+            <select name="category"
+                    class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20">
+                <option value="">All Categories</option>
+                {% for category in categories %}
+                    <option value="{{ category.slug }}"
+                        {% if category.slug == selected_category %}selected{% endif %}>
+                        {{ category.name }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <select name="level"
+                    class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20">
+                <option value="">All Levels</option>
+                {% for level, label in level_choices %}
+                    <option value="{{ level }}"
+                        {% if level == selected_level %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <div class="col-span-2 flex gap-2 md:col-span-1">
+                <button type="submit" class="flex-1 rounded-xl bg-gradient-to-r from-brand-primary to-brand-secondary px-4 py-3 text-sm font-extrabold text-white shadow-lg shadow-brand-primary/20 transition hover:-translate-y-0.5 hover:shadow-xl">
+                    Apply Filters
+                </button>
+                {% if search_query or selected_category or selected_level %}
+                <a href="{% url 'courses:course_list' %}{% if selected_type %}?type={{ selected_type }}{% endif %}"
+                   class="flex items-center justify-center rounded-xl bg-white border border-slate-200 px-4 py-3 text-sm font-bold text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-900"
+                   title="Clear all filters">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </a>
+                {% endif %}
+            </div>
+        </form>
+
+        <!-- Course Grid -->
+        <div class="grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
+
+            {% for course in courses %}
+            {% include "partials/course_card.html" %}
+            {% empty %}
+            <div class="col-span-full rounded-3xl border border-slate-200 bg-white py-16 text-center">
+                <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
+                    <svg class="h-8 w-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </div>
+                <p class="text-lg font-black text-slate-700">No {% if selected_type == 'i2i' %}programs{% else %}courses{% endif %} found</p>
+                <p class="mt-1 text-sm text-slate-500">Try adjusting your search or filters.</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        {% with page_base=selected_type|yesno:"?type="|add:selected_type|default:"?" %}
+        <nav class="mt-10 flex items-center justify-center gap-2 sm:mt-12">
+            {% if page_obj.has_previous %}
+                <a href="?{% if selected_type %}type={{ selected_type }}&{% endif %}page={{ page_obj.previous_page_number }}"
+                   class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-600 shadow-sm transition hover:border-blue-300 hover:text-blue-600 sm:h-11 sm:w-11">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                </a>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-950 text-sm font-extrabold text-white shadow-md sm:h-11 sm:w-11">{{ num }}</span>
+                {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+                    <a href="?{% if selected_type %}type={{ selected_type }}&{% endif %}page={{ num }}"
+                       class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-600 shadow-sm transition hover:border-blue-300 hover:text-blue-600 sm:h-11 sm:w-11">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <a href="?{% if selected_type %}type={{ selected_type }}&{% endif %}page={{ page_obj.next_page_number }}"
+                   class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-600 shadow-sm transition hover:border-blue-300 hover:text-blue-600 sm:h-11 sm:w-11">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </a>
+            {% endif %}
+        </nav>
+        {% endwith %}
+        {% endif %}
+
+    </div>
+</section>
+
+{% endblock %}

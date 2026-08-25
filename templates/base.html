@@ -1,0 +1,339 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>
+        {% block title %}
+            {{ company.meta_title|default:"Skill Jobs Training — Professional IT Training" }}
+        {% endblock %}
+    </title>
+    <meta name="description" content="{% block meta_description %}{{ company.meta_description|default:'Skill Jobs Training — Professional IT Training Platform' }}{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}{{ company.meta_keywords|default:'' }}{% endblock %}">
+    <meta name="robots" content="{% block meta_robots %}index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1{% endblock %}">
+    <link rel="canonical" href="{% block canonical_url %}{{ request.build_absolute_uri }}{% endblock %}">
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800,900" rel="stylesheet" />
+    {% if company and company.favicon %}
+    <link rel="icon" type="image/x-icon" href="{{ company.favicon.url }}">
+    {% else %}
+    <link rel="icon" type="image/x-icon" href="/static/icons/favicon.ico">
+    {% endif %}
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+    <meta property="og:title" content="{% block og_title %}{{ company.og_title|default:company.meta_title }}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{{ company.og_description|default:company.meta_description }}{% endblock %}">
+    <meta property="og:url" content="{% block og_url %}{{ request.build_absolute_uri }}{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{% if company and company.og_image %}{{ company.og_image.url }}{% endif %}{% endblock %}">
+    <meta property="og:site_name" content="{% block og_site_name %}{{ company.name|default:'Skill Jobs Training' }}{% endblock %}">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="{% block twitter_card %}summary_large_image{% endblock %}">
+    <meta name="twitter:title" content="{% block twitter_title %}{{ company.og_title|default:company.meta_title }}{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}{{ company.og_description|default:company.meta_description }}{% endblock %}">
+    <meta name="twitter:image" content="{% block twitter_image %}{% if company and company.og_image %}{{ company.og_image.url }}{% endif %}{% endblock %}">
+
+    {% block geo_meta %}{% endblock %}
+    {% block structured_data %}{% endblock %}
+
+    <!-- Custom head scripts (analytics, meta tags, etc) -->
+    {% if company and company.header_scripts %}
+        {{ company.header_scripts|safe }}
+    {% endif %}
+
+    <!-- Per-company custom CSS -->
+    {% if company and company.custom_css %}
+    <style>
+    {{ company.custom_css|safe }}
+    </style>
+    {% endif %}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+                    colors: {
+                        dark: { 50:'#f0f0ff', 100:'#e0e0ff', 200:'#c2c0ff', 300:'#9b96ff', 400:'#7b6ffa', 500:'#6c5ce7', 600:'#5a3fd6', 700:'#4c31b5', 800:'#1e1245', 900:'#150d35', 950:'#0c0820' },
+                        brand: { primary: '#00AEEF', secondary: '#0D5B9E' },
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'float-delay': 'float 6s ease-in-out 2s infinite',
+                    },
+                    keyframes: {
+                        float: { '0%,100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-12px)' } },
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        [x-cloak]{display:none!important}
+        .grad-text{background:linear-gradient(135deg,#0D5B9E,#00AEEF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .glass{background:rgba(255,255,255,0.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(0,0,0,0.06)}
+        .card-hover{transition:all 0.3s cubic-bezier(0.4,0,0.2,1)}
+        .card-hover:hover{box-shadow:0 0 30px rgba(0,174,239,0.12),0 20px 40px -12px rgba(0,0,0,0.08);transform:translateY(-4px)}
+        .btn-glow{box-shadow:0 0 20px rgba(0,174,239,0.35)}
+        .btn-glow:hover{box-shadow:0 0 35px rgba(0,174,239,0.5)}
+        .section-alt{background-color:#f8f9fc}
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-white text-slate-800 font-sans antialiased">
+    <!-- Navbar -->
+    <nav 
+        class="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+        :class="scrollY > 50 ? 'bg-white/80 backdrop-blur-xl border-b border-slate-200 shadow-sm' : 'bg-transparent'"
+        @scroll.window="scrollY = window.scrollY"
+        x-data="{ isOpen: false, scrollY: 0 }"
+    >
+
+        <!-- top gradient line -->
+        <div class="h-[2px] bg-gradient-to-r from-brand-secondary via-brand-primary to-cyan-300"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 md:h-20">
+
+                <!-- LOGO -->
+                <a href="/" class="flex items-center gap-2">
+                    {% if company and company.logo %}
+                        <img src="{{ company.logo.url }}" class="h-[44px] transition hover:scale-105">
+                    {% else %}
+                        <img src="{% static 'images/logo.png' %}" class="h-[44px] transition hover:scale-105">
+                    {% endif %}
+                </a>
+
+                <!-- DESKTOP MENU -->
+                <div class="hidden md:flex items-center gap-2">
+
+                    <a href="{% url 'core:home' %}" class="px-4 py-2 rounded-xl text-sm font-semibold {% if request.resolver_match.namespace == 'core' and request.resolver_match.url_name == 'home' %}text-brand-primary bg-cyan-50{% else %}text-slate-700 hover:bg-slate-100{% endif %}">Home</a>
+
+                    <a href="{% url 'courses:course_list' %}" class="px-4 py-2 rounded-xl text-sm font-semibold {% if request.resolver_match.namespace == 'courses' and not request.GET.type and not course.course_type == 'i2i' %}text-brand-primary bg-cyan-50{% else %}text-slate-700 hover:bg-slate-100{% endif %}">Courses</a>
+
+                    {% if company.allow_i2i %}
+                    <a href="{% url 'courses:course_list' %}?type=i2i" class="px-4 py-2 rounded-xl text-sm font-semibold {% if request.resolver_match.namespace == 'courses' and request.GET.type == 'i2i' or course.course_type == 'i2i' %}text-brand-primary bg-cyan-50{% else %}text-slate-700 hover:bg-slate-100{% endif %}">I2I</a>
+                    {% endif %}
+
+                    <a href="{% url 'core:about' %}" class="px-4 py-2 rounded-xl text-sm font-semibold {% if request.resolver_match.namespace == 'core' and request.resolver_match.url_name == 'about' %}text-brand-primary bg-cyan-50{% else %}text-slate-700 hover:bg-slate-100{% endif %}">About</a>
+                    
+                    <a href="{% url 'exams:exam_list' %}" class="px-4 py-2 rounded-xl text-sm font-semibold {% if request.resolver_match.namespace == 'exams' %}text-brand-primary bg-cyan-50{% else %}text-slate-700 hover:bg-slate-100{% endif %}">Exams</a>
+
+                    {% if user.is_authenticated %}
+
+                        {% if user.is_staff %}
+                            <a href="{% url 'dashboard:admin_dashboard' %}" class="px-4 py-2 rounded-xl text-sm font-semibold {% if request.resolver_match.namespace == 'dashboard' %}text-brand-primary bg-cyan-50{% else %}text-slate-700 hover:bg-slate-100{% endif %}">Dashboard</a>
+                        {% elif user.role == 'instructor' %}
+                            <a href="{% url 'dashboard:instructor_dashboard' %}" class="px-4 py-2 rounded-xl text-sm font-semibold {% if request.resolver_match.namespace == 'dashboard' %}text-brand-primary bg-cyan-50{% else %}text-slate-700 hover:bg-slate-100{% endif %}">Dashboard</a>
+                        {% else %}
+                            <a href="{% url 'dashboard:student_dashboard' %}" class="px-4 py-2 rounded-xl text-sm font-semibold {% if request.resolver_match.namespace == 'dashboard' %}text-brand-primary bg-cyan-50{% else %}text-slate-700 hover:bg-slate-100{% endif %}">Dashboard</a>
+                        {% endif %}
+
+                        <a href="{% url 'accounts:logout' %}" class="ml-2 px-6 py-2.5 rounded-full text-sm font-bold text-white bg-gradient-to-r from-brand-primary to-brand-secondary shadow-lg hover:scale-105 transition">Logout</a>
+
+                    {% else %}
+
+                        <a href="{% url 'accounts:login' %}" class="px-4 py-2 rounded-xl text-sm font-semibold {% if request.resolver_match.namespace == 'accounts' and request.resolver_match.url_name == 'login' %}text-brand-primary bg-cyan-50{% else %}text-slate-700 hover:bg-slate-100{% endif %}">Login</a>
+
+                        <a href="{% url 'accounts:register' %}" class="ml-2 px-6 py-2.5 rounded-full text-sm font-bold text-white bg-gradient-to-r from-brand-primary to-brand-secondary shadow-lg hover:scale-105 transition {% if request.resolver_match.namespace == 'accounts' and request.resolver_match.url_name == 'register' %}ring-2 ring-blue-200 ring-offset-2{% endif %}">{{ company.header_cta_text|default:"Get Started" }}</a>
+
+                    {% endif %}
+                </div>
+
+                <!-- MOBILE BUTTON -->
+                <button @click="isOpen = !isOpen" class="md:hidden p-2 rounded-xl hover:bg-slate-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor">
+                        <path x-show="!isOpen" d="M4 6h16M4 12h16M4 18h16"/>
+                        <path x-show="isOpen" x-cloak d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- MOBILE MENU -->
+        <div x-show="isOpen" 
+             x-transition:enter="transition ease-out duration-200 origin-top" 
+             x-transition:enter-start="opacity-0 scale-y-95 -translate-y-2" 
+             x-transition:enter-end="opacity-100 scale-y-100 translate-y-0" 
+             x-transition:leave="transition ease-in duration-150 origin-top" 
+             x-transition:leave-start="opacity-100 scale-y-100 translate-y-0" 
+             x-transition:leave-end="opacity-0 scale-y-95 -translate-y-2" 
+             x-cloak class="md:hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-xl border-b shadow-xl shadow-brand-primary/5">
+
+            <div class="px-4 py-4 space-y-2">
+
+                <a href="{% url 'core:home' %}" class="block px-4 py-3 rounded-xl {% if request.resolver_match.namespace == 'core' and request.resolver_match.url_name == 'home' %}bg-cyan-50 text-brand-primary font-semibold{% else %}hover:bg-slate-50{% endif %}">Home</a>
+                <a href="{% url 'courses:course_list' %}" class="block px-4 py-3 rounded-xl {% if request.resolver_match.namespace == 'courses' and not request.GET.type and not course.course_type == 'i2i' %}bg-cyan-50 text-brand-primary font-semibold{% else %}hover:bg-slate-50{% endif %}">Courses</a>
+                {% if company.allow_i2i %}
+                <a href="{% url 'courses:course_list' %}?type=i2i" class="block px-4 py-3 rounded-xl {% if request.resolver_match.namespace == 'courses' and request.GET.type == 'i2i' or course.course_type == 'i2i' %}bg-cyan-50 text-brand-primary font-semibold{% else %}hover:bg-slate-50{% endif %}">I2I</a>
+                {% endif %}
+                <a href="{% url 'core:about' %}" class="block px-4 py-3 rounded-xl {% if request.resolver_match.namespace == 'core' and request.resolver_match.url_name == 'about' %}bg-cyan-50 text-brand-primary font-semibold{% else %}hover:bg-slate-50{% endif %}">About</a>
+                <a href="{% url 'exams:exam_list' %}" class="block px-4 py-3 rounded-xl {% if request.resolver_match.namespace == 'exams' %}bg-cyan-50 text-brand-primary font-semibold{% else %}hover:bg-slate-50{% endif %}">Exams</a>
+
+                {% if user.is_authenticated %}
+                    {% if user.is_staff %}
+                        <a href="{% url 'dashboard:admin_dashboard' %}" class="block px-4 py-3 rounded-xl {% if request.resolver_match.namespace == 'dashboard' %}bg-cyan-50 text-brand-primary font-semibold{% else %}hover:bg-slate-50{% endif %}">Dashboard</a>
+                    {% elif user.role == 'instructor' %}
+                        <a href="{% url 'dashboard:instructor_dashboard' %}" class="block px-4 py-3 rounded-xl {% if request.resolver_match.namespace == 'dashboard' %}bg-cyan-50 text-brand-primary font-semibold{% else %}hover:bg-slate-50{% endif %}">Dashboard</a>
+                    {% else %}
+                        <a href="{% url 'dashboard:student_dashboard' %}" class="block px-4 py-3 rounded-xl {% if request.resolver_match.namespace == 'dashboard' %}bg-cyan-50 text-brand-primary font-semibold{% else %}hover:bg-slate-50{% endif %}">Dashboard</a>
+                    {% endif %}
+                    <a href="{% url 'accounts:logout' %}" class="block px-4 py-3 rounded-full text-center text-white bg-gradient-to-r from-brand-primary to-brand-secondary">Logout</a>
+                {% else %}
+                    <a href="{% url 'accounts:login' %}" class="block px-4 py-3 rounded-xl {% if request.resolver_match.namespace == 'accounts' and request.resolver_match.url_name == 'login' %}bg-cyan-50 text-brand-primary font-semibold{% else %}hover:bg-slate-50{% endif %}">Login</a>
+                    <a href="{% url 'accounts:register' %}" class="block px-4 py-3 rounded-full text-center text-white bg-gradient-to-r from-brand-primary to-brand-secondary {% if request.resolver_match.namespace == 'accounts' and request.resolver_match.url_name == 'register' %}ring-2 ring-blue-200 ring-offset-2{% endif %}">Register</a>
+                {% endif %}
+
+            </div>
+        </div>
+
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+        <div id="toast-container" class="fixed top-20 right-4 z-[100] space-y-2 mt-10">
+            {% for message in messages %}
+                <div class="toast-message transform transition-all duration-500 ease-in-out px-4 py-3 rounded-xl flex items-center justify-between gap-4 shadow-2xl border border-white/20 backdrop-blur-md
+                    {% if message.tags == 'success' %} bg-emerald-500/90 text-white
+                    {% elif message.tags == 'error' %} bg-rose-500/90 text-white
+                    {% elif message.tags == 'warning' %} bg-amber-500/90 text-white
+                    {% else %} bg-cyan-500/90 text-white {% endif %}"
+                    role="alert">
+                    <div class="flex items-center gap-2">
+                        {% if message.tags == 'success' %}
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        {% elif message.tags == 'error' %}
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        {% endif %}
+                        <span class="font-bold text-sm">{{ message }}</span>
+                    </div>
+                    <button onclick="this.parentElement.remove()" class="text-white/70 hover:text-white transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            {% endfor %}
+        </div>
+
+        <script>
+            document.querySelectorAll('.toast-message').forEach(function(toast) {
+                setTimeout(function() {
+                    toast.classList.add('opacity-0', 'translate-x-full');
+                    setTimeout(function() {
+                        toast.remove();
+                    }, 500);
+                }, 5000);
+            });
+        </script>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="{% if request.resolver_match.url_name != 'home' %}pt-[72px] md:pt-[84px]{% endif %}">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="relative bg-slate-950 text-white">
+
+        <!-- gradient glow -->
+        <div class="absolute inset-0 bg-gradient-to-br from-brand-secondary/10 via-brand-primary/10 to-cyan-300/10"></div>
+
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+
+            <!-- GRID -->
+            <div class="grid gap-10 md:grid-cols-4">
+
+                <!-- BRAND -->
+                <div>
+                    <h3 class="text-xl font-black">{{ company.name|default:"Skill Jobs" }}</h3>
+                    <p class="mt-3 text-sm text-slate-400">{{ company.footer_text|default:"Build real-world skills with structured training and expert mentors." }}</p>
+
+                    <div class="mt-5">
+                        <a href="{{ company.courses_link|default:'/courses/' }}" class="inline-block rounded-full bg-gradient-to-r from-brand-primary to-brand-secondary px-5 py-2 text-sm font-bold">{{ company.explore_cta_text|default:"Explore Courses →" }}</a>
+                    </div>
+                    {% if company.facebook_url or company.x_url or company.linkedin_url or company.youtube_url %}
+                    <div class="mt-5 flex flex-wrap gap-2">
+                        {% if company.facebook_url %}
+                        <a href="{{ company.facebook_url }}" target="_blank" rel="noopener" aria-label="Facebook" class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-700 text-slate-300 transition hover:border-blue-400 hover:text-white">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 21v-7h2.4l.4-3h-2.8V9.1c0-.9.2-1.6 1.6-1.6H16V4.8c-.2 0-1-.1-2-.1-2 0-3.4 1.2-3.4 3.5V11H8v3h2.6v7h2.9z"/></svg>
+                        </a>
+                        {% endif %}
+                        {% if company.x_url %}
+                        <a href="{{ company.x_url }}" target="_blank" rel="noopener" aria-label="X" class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-700 text-slate-300 transition hover:border-blue-400 hover:text-white">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.9 3H22l-6.7 7.6L23 21h-6.1l-4.8-6.3L6.6 21H3.5l7.2-8.2L3 3h6.2l4.3 5.7L18.9 3zm-1.1 16h1.7L8.2 4.9H6.4L17.8 19z"/></svg>
+                        </a>
+                        {% endif %}
+                        {% if company.linkedin_url %}
+                        <a href="{{ company.linkedin_url }}" target="_blank" rel="noopener" aria-label="LinkedIn" class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-700 text-slate-300 transition hover:border-blue-400 hover:text-white">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.94 8.5A1.56 1.56 0 115.38 7a1.56 1.56 0 011.56 1.5zM7 10H3.8v10H7V10zm5.2 0H9v10h3.2v-5.2c0-2.8 3.6-3 3.6 0V20H19v-6.3c0-4.9-5.5-4.7-6.8-2.3V10z"/></svg>
+                        </a>
+                        {% endif %}
+                        {% if company.youtube_url %}
+                        <a href="{{ company.youtube_url }}" target="_blank" rel="noopener" aria-label="YouTube" class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-700 text-slate-300 transition hover:border-blue-400 hover:text-white">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.5 7.2a3 3 0 00-2.1-2.1C19.6 4.6 12 4.6 12 4.6s-7.6 0-9.4.5A3 3 0 00.5 7.2 31.8 31.8 0 000 12a31.8 31.8 0 00.5 4.8 3 3 0 002.1 2.1c1.8.5 9.4.5 9.4.5s7.6 0 9.4-.5a3 3 0 002.1-2.1A31.8 31.8 0 0024 12a31.8 31.8 0 00-.5-4.8zM9.6 15.2V8.8l6 3.2-6 3.2z"/></svg>
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- PLATFORM -->
+                <div>
+                    <h4 class="font-bold mb-4">Platform</h4>
+                    <ul class="space-y-2 text-slate-400 text-sm">
+                        <li><a href="/" class="hover:text-white">Home</a></li>
+                        <li><a href="/courses/" class="hover:text-white">Courses</a></li>
+                        <li><a href="/about" class="hover:text-white">About</a></li>
+                    </ul>
+                </div>
+
+                <!-- ACCOUNT -->
+                <div>
+                    <h4 class="font-bold mb-4">Account</h4>
+                    <ul class="space-y-2 text-slate-400 text-sm">
+                        {% if user.is_authenticated %}
+                            {% if user.is_staff %}
+                                <li><a href="{% url 'dashboard:admin_dashboard' %}" class="hover:text-white">Dashboard</a></li>
+                            {% elif user.role == 'instructor' %}
+                                <li><a href="{% url 'dashboard:instructor_dashboard' %}" class="hover:text-white">Dashboard</a></li>
+                            {% else %}
+                                <li><a href="{% url 'dashboard:student_dashboard' %}" class="hover:text-white">Dashboard</a></li>
+                            {% endif %}
+                            <li><a href="{% url 'accounts:logout' %}" class="hover:text-white">Logout</a></li>
+                        {% else %}
+                            <li><a href="{% url 'accounts:login' %}" class="hover:text-white">Login</a></li>
+                            <li><a href="{% url 'accounts:register' %}" class="hover:text-white">Register</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                <!-- CONTACT -->
+                <div>
+                    <h4 class="font-bold mb-4">Contact</h4>
+                    <ul class="space-y-2 text-slate-400 text-sm">
+                        {% if company.contact_phone %}
+                            <li>📞 {{ company.contact_phone }}</li>
+                        {% endif %}
+                        {% if company.contact_email %}
+                            <li>📧 {{ company.contact_email }}</li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+            </div>
+
+            <!-- BOTTOM -->
+            <div class="mt-12 border-t border-slate-800 pt-6 text-center text-sm text-slate-500 mb-5">
+                © {{ company.copyright_year|default:2026 }} {{ company.name|default:"Skill Jobs Training" }}. All rights reserved.
+            </div>
+
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+    {% if company and company.footer_scripts %}
+        {{ company.footer_scripts|safe }}
+    {% endif %}
+</body>
+</html>

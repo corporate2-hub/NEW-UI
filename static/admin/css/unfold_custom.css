@@ -1,0 +1,33 @@
+/* Force borders on all inputs for Unfold compatibility */
+input[type='text'],
+input[type='password'],
+input[type='email'],
+input[type='number'],
+textarea,
+select {
+    border: 1px solid #d1d5db !important; /* Tailwind gray-300 */
+    border-radius: 0.375rem !important;
+    padding: 0.5rem 0.75rem !important;
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    display: block !important;
+    width: 100% !important;
+    outline: 2px solid transparent !important;
+}
+
+/* Dark mode support */
+.dark input[type='text'],
+.dark input[type='password'],
+.dark input[type='email'],
+.dark textarea,
+.dark select {
+    border: 1px solid #374151 !important; /* Tailwind gray-700 */
+    background-color: #1f2937 !important;
+    color: #f9fafb !important;
+}
+
+/* Focus state */
+input:focus {
+    border-color: #4f46e5 !important; /* Tailwind indigo-600 */
+    box-shadow: 0 0 0 2px rgba(79,70,229,0.15) !important;
+}

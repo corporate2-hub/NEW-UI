@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+{% load exam_tags %}
+
+{% block title %}Taking {{ exam.title }} - {{ company.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .timer-glow { box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+    [x-cloak] { display: none !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="py-8 bg-slate-50 min-h-screen" 
+         x-data="examManager({{ time_limit_seconds }}, {{ questions|length }})" 
+         x-init="init()">
+    <div class="max-w-4xl mx-auto px-4">
+        
+        <!-- Sticky Header -->
+        <div class="sticky top-20 z-40 bg-white/80 backdrop-blur-md border border-slate-200 rounded-3xl p-4 mb-8 flex items-center justify-between shadow-lg shadow-slate-100">
+            <div>
+                <h1 class="text-lg font-black text-slate-900 leading-tight">{{ exam.title }}</h1>
+                <div class="flex items-center gap-2 mt-1">
+                    <template x-for="i in totalQuestions" :key="i">
+                        <div class="w-2 h-2 rounded-full transition-all duration-300"
+                             :class="currentIndex === (i-1) ? 'bg-blue-600 w-4' : (answers[i-1] ? 'bg-green-400' : 'bg-slate-200')">
+                        </div>
+                    </template>
+                    <span class="text-[10px] text-slate-400 font-bold uppercase ml-2" x-text="`${currentIndex + 1} / ${totalQuestions}`"></span>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <div class="text-right">
+                    <span class="block text-[10px] uppercase font-black text-slate-400 tracking-widest">Time Remaining</span>
+                    <span class="text-xl font-mono font-black tabular-nums" :class="timeLeft < 60 ? 'text-rose-600 animate-pulse' : 'text-blue-600'" x-text="formatTime(timeLeft)"></span>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+            </div>
+        </div>
+
+        <form id="examForm" action="{% url 'exams:take_exam' exam.id %}" method="POST" class="relative">
+            {% csrf_token %}
+            <input type="hidden" name="attempt_id" value="{{ attempt.id }}">
+            
+            <div class="relative overflow-hidden min-h-[400px]">
+                {% for question in questions %}
+                    <div x-show="currentIndex === {{ forloop.counter0 }}" 
+                         x-transition:enter="transition ease-out duration-300"
+                         x-transition:enter-start="opacity-0 translate-x-8"
+                         x-transition:enter-end="opacity-100 translate-x-0"
+                         class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 card-hover w-full">
+                        
+                        <div class="flex items-start gap-4 mb-6">
+                            <span class="flex-shrink-0 w-10 h-10 rounded-2xl bg-slate-900 text-white flex items-center justify-center font-black text-sm">
+                                {{ forloop.counter }}
+                            </span>
+                            <h3 class="text-lg md:text-xl font-bold text-slate-900 leading-relaxed pt-1">
+                                {{ question.question_text }}
+                            </h3>
+                        </div>
+
+                        <div class="grid gap-3">
+                            
+                            
+
+                            {% for option_key, option_label in question.OPTION_CHOICES %}
+                                <label class="group relative flex items-center p-4 md:p-5 rounded-2xl border-2 transition-all duration-200"
+                                       :class="[
+                                            answers[{{ forloop.parentloop.counter0 }}] === '{{ option_key }}' ? 'border-blue-600 bg-blue-50/50' : 'border-slate-50 hover:border-blue-200 hover:bg-blue-50/30',
+                                            locked[{{ forloop.parentloop.counter0 }}] ? 'cursor-not-allowed opacity-80 pointer-events-none' : 'cursor-pointer'
+                                       ]">
+                                    <input type="radio" 
+                                           name="question_{{ question.id }}" 
+                                           value="{{ option_key }}" 
+                                           class="hidden peer" 
+                                           x-model="answers[{{ forloop.parentloop.counter0 }}]" 
+                                           @change="if(!locked[{{ forloop.parentloop.counter0 }}]) lockQuestion({{ forloop.parentloop.counter0 }})">
+                                    
+                                    <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center mr-4 transition-all"
+                                         :class="answers[{{ forloop.parentloop.counter0 }}] === '{{ option_key }}' ? 'border-blue-600 bg-blue-600' : 'border-slate-200'">
+                                        <div class="w-2 h-2 rounded-full bg-white transition-transform"
+                                             :class="answers[{{ forloop.parentloop.counter0 }}] === '{{ option_key }}' ? 'scale-100' : 'scale-0'"></div>
+                                    </div>
+                                    <div class="flex-grow">
+                                        <span class="block text-sm font-bold text-slate-400 mb-0.5">{{ option_label }}</span>
+                                        <span class="text-slate-700 font-semibold">
+                                            {% if option_key == 'A' %}{{ question.option_a }}
+                                            {% elif option_key == 'B' %}{{ question.option_b }}
+                                            {% elif option_key == 'C' %}{{ question.option_c }}
+                                            {% elif option_key == 'D' %}{{ question.option_d }}{% endif %}
+                                        </span>
+                                    </div>
+                                    <template x-if="locked[{{ forloop.parentloop.counter0 }}] && answers[{{ forloop.parentloop.counter0 }}] === '{{ option_key }}'">
+                                        <svg class="w-5 h-5 text-blue-600 ml-auto" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                    </template>
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Navigation Controls -->
+            <div class="pt-8 flex items-center justify-between">
+                <button type="button" 
+                        @click="prev()" 
+                        x-show="currentIndex > 0"
+                        class="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 text-slate-600 rounded-2xl font-bold hover:bg-slate-50 transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    Previous
+                </button>
+                <div x-show="currentIndex === 0" class="flex-1"></div>
+
+                <div class="flex gap-4">
+                    <button type="button" 
+                            @click="next()" 
+                            x-show="currentIndex < totalQuestions - 1"
+                            class="flex items-center gap-2 px-8 py-3 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-100"
+                            :disabled="!answers[currentIndex]">
+                        Next Question
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </button>
+
+                    <button type="button" 
+                            @click="confirmSubmit()"
+                            x-show="currentIndex === totalQuestions - 1"
+                            class="flex items-center gap-2 px-10 py-3 bg-slate-900 text-white rounded-2xl font-bold hover:bg-blue-600 transition-all shadow-xl shadow-slate-200"
+                            :disabled="!answers[currentIndex]">
+                        Finish & Submit
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function examManager(initialSeconds, totalQs) {
+        return {
+            timeLeft: initialSeconds,
+            currentIndex: 0,
+            totalQuestions: totalQs,
+            answers: {},
+            locked: Array(totalQs).fill(false),
+            attemptId: '{{ attempt.id }}',
+
+            init() {
+                // Load saved state from localStorage if exists
+                const saved = localStorage.getItem(`exam_state_${this.attemptId}`);
+                if (saved) {
+                    const state = JSON.parse(saved);
+                    this.currentIndex = state.currentIndex || 0;
+                    this.answers = state.answers || {};
+                    this.locked = state.locked || Array(totalQs).fill(false);
+                }
+
+                const timer = setInterval(() => {
+                    if (this.timeLeft > 0) {
+                        this.timeLeft--;
+                        this.saveState();
+                    } else {
+                        clearInterval(timer);
+                        this.autoSubmit();
+                    }
+                }, 1000);
+            },
+
+            saveState() {
+                localStorage.setItem(`exam_state_${this.attemptId}`, JSON.stringify({
+                    currentIndex: this.currentIndex,
+                    answers: this.answers,
+                    locked: this.locked,
+                    timeLeft: this.timeLeft
+                }));
+            },
+
+            formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                return `${mins}:${secs.toString().padStart(2, '0')}`;
+            },
+
+            next() {
+                if (this.currentIndex < this.totalQuestions - 1) {
+                    this.currentIndex++;
+                    this.saveState();
+                }
+            },
+
+            prev() {
+                if (this.currentIndex > 0) {
+                    this.currentIndex--;
+                    this.saveState();
+                }
+            },
+
+            lockQuestion(index) {
+                // Lock the question after an answer is picked
+                this.locked[index] = true;
+                this.saveState();
+            },
+
+            confirmSubmit() {
+                if (confirm('Are you sure you want to submit your exam? You cannot change your answers after this.')) {
+                    this.submitExam();
+                }
+            },
+
+            autoSubmit() {
+                alert('Time is up! Your exam will be submitted automatically.');
+                this.submitExam();
+            },
+
+            submitExam() {
+                localStorage.removeItem(`exam_state_${this.attemptId}`);
+                window.onbeforeunload = null;
+                document.getElementById('examForm').submit();
+            }
+        }
+    }
+
+    // Prevent navigation away
+    window.onbeforeunload = function() {
+        return "Are you sure you want to leave? Your progress may be lost.";
+    };
+</script>
+{% endblock %}

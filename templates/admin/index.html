@@ -1,0 +1,451 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}Dashboard | {{ site_title }}{% endblock %}
+
+{% block content %}
+{% with s=dashboard_stats %}
+{% if s %}
+<style>
+  /* ── reset spacing that unfold injects above content ── */
+  #content { padding-top: 0; }
+
+  /* ── section heading ── */
+  .db-heading {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    color: #6b7280;
+    margin: 28px 0 12px;
+    padding-left: 2px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .db-heading::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #e5e7eb;
+  }
+
+  /* ── card grid ── */
+  .db-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+    gap: 14px;
+  }
+
+  /* ── single card ── */
+  .db-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 18px 20px 16px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,.05);
+    transition: box-shadow .15s, transform .15s;
+    text-decoration: none !important;
+    display: block;
+    color: inherit;
+  }
+  .db-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,.1);
+    transform: translateY(-2px);
+  }
+
+  /* accent bar on top */
+  .db-card::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 4px;
+    border-radius: 14px 14px 0 0;
+  }
+  .db-card.blue::before   { background: linear-gradient(90deg,#3b82f6,#60a5fa); }
+  .db-card.green::before  { background: linear-gradient(90deg,#10b981,#34d399); }
+  .db-card.amber::before  { background: linear-gradient(90deg,#f59e0b,#fbbf24); }
+  .db-card.red::before    { background: linear-gradient(90deg,#ef4444,#f87171); }
+  .db-card.indigo::before { background: linear-gradient(90deg,#6366f1,#818cf8); }
+  .db-card.purple::before { background: linear-gradient(90deg,#8b5cf6,#a78bfa); }
+  .db-card.teal::before   { background: linear-gradient(90deg,#14b8a6,#2dd4bf); }
+  .db-card.rose::before   { background: linear-gradient(90deg,#f43f5e,#fb7185); }
+  .db-card.sky::before    { background: linear-gradient(90deg,#0ea5e9,#38bdf8); }
+  .db-card.orange::before { background: linear-gradient(90deg,#f97316,#fb923c); }
+
+  /* icon circle */
+  .db-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+  .db-card.blue   .db-icon { background:#eff6ff; }
+  .db-card.green  .db-icon { background:#ecfdf5; }
+  .db-card.amber  .db-icon { background:#fffbeb; }
+  .db-card.red    .db-icon { background:#fef2f2; }
+  .db-card.indigo .db-icon { background:#eef2ff; }
+  .db-card.purple .db-icon { background:#f5f3ff; }
+  .db-card.teal   .db-icon { background:#f0fdfa; }
+  .db-card.rose   .db-icon { background:#fff1f2; }
+  .db-card.sky    .db-icon { background:#f0f9ff; }
+  .db-card.orange .db-icon { background:#fff7ed; }
+
+  .db-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: #9ca3af;
+    margin-bottom: 4px;
+  }
+  .db-value {
+    font-size: 30px;
+    font-weight: 900;
+    color: #111827;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .db-sub {
+    font-size: 11px;
+    color: #9ca3af;
+  }
+  .db-sub .pill {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 9px;
+    font-weight: 700;
+    font-size: 10px;
+  }
+  .pill-green { background:#dcfce7; color:#16a34a; }
+  .pill-amber { background:#fef9c3; color:#b45309; }
+  .pill-blue  { background:#dbeafe; color:#2563eb; }
+
+  /* ── quick-links row ── */
+  .db-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 28px;
+    margin-bottom: 8px;
+  }
+  .db-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 20px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none !important;
+    transition: opacity .15s;
+  }
+  .db-action-btn:hover { opacity: .85; }
+  .db-action-btn.blue   { background:#3b82f6; color:#fff !important; }
+  .db-action-btn.green  { background:#10b981; color:#fff !important; }
+  .db-action-btn.indigo { background:#6366f1; color:#fff !important; }
+  .db-action-btn.amber  { background:#f59e0b; color:#fff !important; }
+
+  /* ── app module list (unchanged django default) ── */
+  #content-main { margin-top: 24px; }
+</style>
+
+<!-- ═══════════════════ QUICK ACTIONS ═══════════════════ -->
+<div class="db-actions">
+  <a class="db-action-btn blue"   href="{% url 'admin:enrollments_salesrecord_changelist' %}">📊 Sales Records</a>
+  <a class="db-action-btn green"  href="{% url 'admin:enrollments_salesrecord_import_csv' %}">⬆ Import CSV</a>
+  <a class="db-action-btn indigo" href="{% url 'admin:enrollments_enrollment_changelist' %}">📋 Enrollments</a>
+  <a class="db-action-btn amber"  href="{% url 'admin:enrollments_batch_changelist' %}">📦 Batches</a>
+</div>
+
+<!-- ═══════════════════ OVERVIEW ═══════════════════ -->
+<div class="db-heading">Overview</div>
+<div class="db-grid">
+
+  {% if s.is_superuser %}
+  <a class="db-card blue" href="{% url 'admin:accounts_company_changelist' %}">
+    <div class="db-icon">🏢</div>
+    <div class="db-label">Companies</div>
+    <div class="db-value">{{ s.total_companies }}</div>
+    <div class="db-sub">Registered tenants</div>
+  </a>
+  {% endif %}
+
+  <a class="db-card teal" href="{% url 'admin:accounts_customuser_changelist' %}?role=student">
+    <div class="db-icon">🎓</div>
+    <div class="db-label">Students</div>
+    <div class="db-value">{{ s.total_students }}</div>
+    <div class="db-sub">Active learners</div>
+  </a>
+
+  <a class="db-card indigo" href="{% url 'admin:accounts_customuser_changelist' %}?role=instructor">
+    <div class="db-icon">👨‍🏫</div>
+    <div class="db-label">Instructors</div>
+    <div class="db-value">{{ s.total_instructors }}</div>
+    <div class="db-sub">Teaching staff</div>
+  </a>
+
+  <a class="db-card blue" href="{% url 'admin:courses_course_changelist' %}">
+    <div class="db-icon">📚</div>
+    <div class="db-label">Courses</div>
+    <div class="db-value">{{ s.total_courses }}</div>
+    <div class="db-sub">
+      <span class="pill pill-green">{{ s.published_courses }} live</span>
+      <span class="pill pill-amber">{{ s.draft_courses }} draft</span>
+    </div>
+  </a>
+
+  <a class="db-card purple" href="{% url 'admin:enrollments_batch_changelist' %}">
+    <div class="db-icon">📦</div>
+    <div class="db-label">Batches</div>
+    <div class="db-value">{{ s.total_batches }}</div>
+    <div class="db-sub">
+      <span class="pill pill-green">{{ s.running_batches }} running</span>
+      <span class="pill pill-blue">{{ s.upcoming_batches }} upcoming</span>
+    </div>
+  </a>
+
+</div>
+
+<!-- ═══════════════════ ENROLLMENTS & REVENUE ═══════════════════ -->
+<div class="db-heading">Enrollments &amp; Revenue</div>
+<div class="db-grid">
+
+  <a class="db-card green" href="{% url 'admin:enrollments_enrollment_changelist' %}?status=approved">
+    <div class="db-icon">✅</div>
+    <div class="db-label">Approved</div>
+    <div class="db-value">{{ s.approved_enrollments }}</div>
+    <div class="db-sub">of {{ s.total_enrollments }} total</div>
+  </a>
+
+  <a class="db-card amber" href="{% url 'admin:enrollments_enrollment_changelist' %}?status=pending">
+    <div class="db-icon">⏳</div>
+    <div class="db-label">Pending</div>
+    <div class="db-value">{{ s.pending_enrollments }}</div>
+    <div class="db-sub">Awaiting review</div>
+  </a>
+
+  <a class="db-card indigo" href="{% url 'admin:enrollments_salesrecord_changelist' %}">
+    <div class="db-icon">💰</div>
+    <div class="db-label">Total Revenue</div>
+    <div class="db-value">BDT. {{ s.total_revenue }}</div>
+    <div class="db-sub">Approved enrollments</div>
+  </a>
+
+  <a class="db-card sky" href="{% url 'admin:enrollments_salesrecord_changelist' %}">
+    <div class="db-icon">📅</div>
+    <div class="db-label">This Month</div>
+    <div class="db-value">{{ s.monthly_enrollments }}</div>
+    <div class="db-sub">{{ s.month_label }} enrolments</div>
+  </a>
+
+  <a class="db-card teal" href="{% url 'admin:enrollments_salesrecord_changelist' %}">
+    <div class="db-icon">🏆</div>
+    <div class="db-label">Monthly Revenue</div>
+    <div class="db-value">BDT. {{ s.monthly_revenue }}</div>
+    <div class="db-sub">{{ s.month_label }}</div>
+  </a>
+
+  <a class="db-card rose" href="{% url 'admin:enrollments_enrollment_changelist' %}">
+    <div class="db-icon">🎓</div>
+    <div class="db-label">Certificates</div>
+    <div class="db-value">{{ s.certs_issued }}</div>
+    <div class="db-sub">Issued to date</div>
+  </a>
+
+</div>
+
+<!-- ═══════════════════ CLASSES & ATTENDANCE ═══════════════════ -->
+<div class="db-heading">Classes &amp; Attendance</div>
+<div class="db-grid">
+
+  <a class="db-card blue" href="{% url 'admin:classes_classsession_changelist' %}">
+    <div class="db-icon">🖥️</div>
+    <div class="db-label">Class Sessions</div>
+    <div class="db-value">{{ s.total_sessions }}</div>
+    <div class="db-sub">
+      <span class="pill pill-green">{{ s.today_sessions }} today</span>
+    </div>
+  </a>
+
+  <a class="db-card green" href="{% url 'admin:attendance_attendance_changelist' %}">
+    <div class="db-icon">📋</div>
+    <div class="db-label">Attendance Records</div>
+    <div class="db-value">{{ s.total_attendance }}</div>
+    <div class="db-sub">
+      <span class="pill pill-green">{{ s.attendance_pct }}% present rate</span>
+    </div>
+  </a>
+
+  <a class="db-card violet" style="--accent: #8b5cf6;" href="{% url 'admin:exams_exam_changelist' %}">
+    <div class="db-icon" style="background:#f5f3ff;">📝</div>
+    <div class="db-label">Exams</div>
+    <div class="db-value">{{ s.total_exams }}</div>
+    <div class="db-sub">
+      <span class="pill pill-blue" style="background:#e0e7ff;color:#4338ca;">{{ s.total_attempts }} attempts</span>
+    </div>
+  </a>
+
+</div>
+
+<!-- ═══════════════════ APP MODULE LIST ═══════════════════ -->
+<div class="db-heading">All Modules</div>
+{% endif %}
+{% endwith %}
+
+{# ── Styled app/model navigation grid ── #}
+<style>
+  /* ── Reset for violet cards ── */
+  .db-card.violet::before { background: linear-gradient(90deg,#8b5cf6,#a78bfa); }
+
+  .mod-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .mod-app {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,.04);
+  }
+  .mod-app-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px 12px;
+    border-bottom: 1px solid #f3f4f6;
+    background: #f9fafb;
+  }
+  .mod-app-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+  .mod-app-name {
+    font-size: 13px;
+    font-weight: 800;
+    color: #1f2937;
+    text-decoration: none;
+    letter-spacing: .2px;
+  }
+  .mod-app-name:hover { color: #3b82f6; }
+  .mod-model-list {
+    list-style: none;
+    margin: 0;
+    padding: 8px 0;
+  }
+  .mod-model-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 18px;
+    border-bottom: 1px solid #f9fafb;
+    transition: background .1s;
+  }
+  .mod-model-item:last-child { border-bottom: none; }
+  .mod-model-item:hover { background: #f9fafb; }
+  .mod-model-name {
+    font-size: 13px;
+    color: #374151;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .mod-model-name:hover { color: #3b82f6; }
+  .mod-model-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .mod-btn {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 6px;
+    text-decoration: none !important;
+    letter-spacing: .3px;
+    text-transform: uppercase;
+  }
+  .mod-btn-add    { background:#dcfce7; color:#15803d; }
+  .mod-btn-add:hover { background:#bbf7d0; }
+  .mod-btn-view   { background:#dbeafe; color:#1d4ed8; }
+  .mod-btn-view:hover { background:#bfdbfe; }
+
+  /* per-app accent colours */
+  .mod-app[data-app="accounts"]    .mod-app-icon { background:#eff6ff; }
+  .mod-app[data-app="core"]        .mod-app-icon { background:#f0fdf4; }
+  .mod-app[data-app="courses"]     .mod-app-icon { background:#faf5ff; }
+  .mod-app[data-app="enrollments"] .mod-app-icon { background:#fff7ed; }
+  .mod-app[data-app="classes"]     .mod-app-icon { background:#f0f9ff; }
+  .mod-app[data-app="attendance"]  .mod-app-icon { background:#fef2f2; }
+  .mod-app[data-app="exams"]       .mod-app-icon { background:#f5f3ff; }
+  .mod-app[data-app="dashboard"]   .mod-app-icon { background:#f5f3ff; }
+  .mod-app[data-app="auth"]        .mod-app-icon { background:#fefce8; }
+</style>
+
+{% if app_list %}
+<div class="mod-grid">
+  {% for app in app_list %}
+  {% with label=app.app_label %}
+  <div class="mod-app" data-app="{{ label }}">
+    <div class="mod-app-header">
+      <div class="mod-app-icon">
+        {% if label == "accounts" %}👥
+        {% elif label == "courses" %}📚
+        {% elif label == "enrollments" %}📋
+        {% elif label == "classes" %}🖥️
+        {% elif label == "attendance" %}✅
+        {% elif label == "exams" %}📝
+        {% elif label == "core" %}⚙️
+        {% elif label == "dashboard" %}📊
+        {% elif label == "auth" %}🔐
+        {% else %}📁{% endif %}
+      </div>
+      <a class="mod-app-name" href="{{ app.app_url }}">{{ app.name }}</a>
+    </div>
+    <ul class="mod-model-list">
+      {% for model in app.models %}
+      <li class="mod-model-item">
+        {% if model.admin_url %}
+          <a class="mod-model-name" href="{{ model.admin_url }}">{{ model.name }}</a>
+        {% else %}
+          <span class="mod-model-name" style="color:#9ca3af;">{{ model.name }}</span>
+        {% endif %}
+        <div class="mod-model-actions">
+          {% if model.add_url %}
+            <a class="mod-btn mod-btn-add" href="{{ model.add_url }}">+ Add</a>
+          {% endif %}
+          {% if model.admin_url %}
+            {% if model.view_only %}
+              <a class="mod-btn mod-btn-view" href="{{ model.admin_url }}">View</a>
+            {% else %}
+              <a class="mod-btn mod-btn-view" href="{{ model.admin_url }}">List</a>
+            {% endif %}
+          {% endif %}
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endwith %}
+  {% endfor %}
+</div>
+{% else %}
+  <p style="color:#6b7280;font-size:13px;">{% translate "You don't have permission to view or edit anything." %}</p>
+{% endif %}
+{% endblock %}
+
+{% block sidebar %}{% endblock %}

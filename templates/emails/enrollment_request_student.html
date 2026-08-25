@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enrollment Request Received</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f7f6; color: #333; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .header { background-color: #4a90e2; color: #ffffff; padding: 30px 20px; text-align: center; }
+        .header h1 { margin: 0; font-size: 24px; font-weight: 600; }
+        .content { padding: 30px 40px; line-height: 1.6; }
+        .content p { margin: 0 0 15px; }
+        .details-box { background-color: #f9fbff; border-left: 4px solid #4a90e2; padding: 15px 20px; margin: 25px 0; border-radius: 4px; }
+        .details-box p { margin: 5px 0; font-size: 15px; }
+        .footer { background-color: #f4f7f6; text-align: center; padding: 20px; font-size: 13px; color: #777; border-top: 1px solid #eeeeee; }
+        .btn { display: inline-block; background-color: #4a90e2; color: #ffffff; text-decoration: none; padding: 12px 25px; border-radius: 4px; font-weight: bold; margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Enrollment Request Received</h1>
+        </div>
+        <div class="content">
+            <p>Hi <strong>{{ student_name }}</strong>,</p>
+            <p>We have successfully received your enrollment request for the following course.</p>
+            
+            <div class="details-box">
+                <p><strong>Course:</strong> {{ course_name }}</p>
+                <p><strong>Batch:</strong> {{ batch_name }}</p>
+                <p><strong>Date Requested:</strong> {{ request_date }}</p>
+            </div>
+            
+            <p>Your request is currently <strong>Pending Approval</strong>. We will notify you once it has been reviewed and approved by our team.</p>
+            
+            <center>
+                <a href="{{ dashboard_url }}" class="btn">View Dashboard</a>
+            </center>
+        </div>
+        <div class="footer">
+            <p>&copy; {{ current_year }} {{ company_name }}. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

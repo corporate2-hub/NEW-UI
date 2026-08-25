@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block title %}My Enrollments — Skill Jobs Training{% endblock %}
+
+{% block content %}
+<section class="py-12 bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Breadcrumbs -->
+        <nav class="text-sm text-slate-500 mb-4" aria-label="Breadcrumb">
+            <ol class="flex items-center gap-2">
+                <li><a href="{% url 'core:home' %}" class="hover:underline">Home</a></li>
+                <li>•</li>
+                <li><a href="{% url 'dashboard:student_dashboard' %}" class="hover:underline">Dashboard</a></li>
+                <li>•</li>
+                <li class="font-semibold text-slate-700">My Enrollments</li>
+            </ol>
+        </nav>
+
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-12">
+            <div>
+                <h1 class="text-4xl sm:text-5xl font-bold text-slate-900 mb-2">My Enrollments</h1>
+                <p class="text-slate-600">Manage and track your course enrollments</p>
+            </div>
+            <a href="{% url 'dashboard:student_dashboard' %}" class="mt-6 sm:mt-0 inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+                Go to Dashboard
+            </a>
+        </div>
+        
+        <div class="space-y-8">
+            <!-- Approved -->
+            {% if approved_enrollments %}
+            <div>
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-green-100">
+                        <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900">Active Enrollments</h2>
+                </div>
+                <div class="grid gap-4 md:grid-cols-2">
+                    {% for enrollment in approved_enrollments %}
+                    <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden border border-slate-100 hover:border-green-200">
+                        <div class="p-6">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-bold text-slate-900">{{ enrollment.batch.course.title }}</h3>
+                                    <p class="text-sm text-slate-600 mt-1">{{ enrollment.batch.name }}</p>
+                                </div>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                                    Active
+                                </span>
+                            </div>
+                            <!-- Payment info -->
+                            <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
+                                <div class="bg-slate-50 rounded-lg px-3 py-2">
+                                    <span class="text-slate-500 block">Course Fee</span>
+                                    <span class="font-bold text-slate-800">৳{{ enrollment.course_fee|floatformat:0 }}</span>
+                                </div>
+                                {% if enrollment.applied_discount %}
+                                <div class="bg-amber-50 rounded-lg px-3 py-2">
+                                    <span class="text-slate-500 block">Discount{% if enrollment.coupon %} ({{ enrollment.coupon.code }}){% endif %}</span>
+                                    <span class="font-bold text-amber-700">- ৳{{ enrollment.applied_discount|floatformat:0 }}</span>
+                                </div>
+                                {% endif %}
+                                <div class="bg-blue-50 rounded-lg px-3 py-2">
+                                    <span class="text-slate-500 block">Total Due</span>
+                                    {% if enrollment.payment_status == 'paid' or enrollment.payment_status == 'waived' %}
+                                    <span class="font-bold text-green-600">৳0 ✓</span>
+                                    {% else %}
+                                    <span class="font-bold text-blue-700">৳{{ enrollment.total_due|floatformat:0 }}</span>
+                                    {% endif %}
+                                </div>
+                                <div class="rounded-lg px-3 py-2 {% if enrollment.payment_status == 'paid' %}bg-green-50{% elif enrollment.payment_status == 'waived' %}bg-purple-50{% else %}bg-orange-50{% endif %}">
+                                    <span class="text-slate-500 block">Payment</span>
+                                    {% if enrollment.payment_status == 'paid' %}
+                                    <span class="font-bold text-green-700">Paid</span>
+                                    {% elif enrollment.payment_status == 'waived' %}
+                                    <span class="font-bold text-purple-700">Waived</span>
+                                    {% else %}
+                                    <span class="font-bold text-orange-700">Unpaid</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-3">Enrolled: {{ enrollment.approval_date|date:"M d, Y" }}</p>
+                            <a href="{% url 'classes:batch_class_list' batch_id=enrollment.batch.id %}" class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-white bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 transition-all">
+                                View Classes
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </a>
+                            {% if enrollment.certificate_allowed %}
+                            <a href="{% url 'enrollments:student_certificate' enrollment.id %}" class="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all">
+                                {% if enrollment.certificate_pdf %}
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
+                                </svg>
+                                View Certificate
+                                {% else %}
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                Generate Certificate
+                                {% endif %}
+                            </a>
+                            {% else %}
+                            <div class="mt-4 p-2 rounded-lg bg-blue-50 border border-blue-200">
+                                <p class="text-xs text-blue-700 font-medium">📋 Certificate pending admin approval</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Pending -->
+            {% if pending_enrollments %}
+            <div>
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-amber-100">
+                        <svg class="w-6 h-6 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.5a1 1 0 002 0V7zm0 7a1 1 0 10-2 0v1a1 1 0 002 0v-1z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900">Pending Approval</h2>
+                </div>
+                <div class="grid gap-4 md:grid-cols-2">
+                    {% for enrollment in pending_enrollments %}
+                    <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden border border-slate-100 hover:border-amber-200">
+                        <div class="p-6">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-bold text-slate-900">{{ enrollment.batch.course.title }}</h3>
+                                    <p class="text-sm text-slate-600 mt-1">{{ enrollment.batch.name }}</p>
+                                </div>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
+                                    Pending
+                                </span>
+                            </div>
+                            <!-- Payment info -->
+                            <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
+                                <div class="bg-slate-50 rounded-lg px-3 py-2">
+                                    <span class="text-slate-500 block">Course Fee</span>
+                                    <span class="font-bold text-slate-800">৳{{ enrollment.course_fee|floatformat:0 }}</span>
+                                </div>
+                                {% if enrollment.applied_discount %}
+                                <div class="bg-amber-50 rounded-lg px-3 py-2">
+                                    <span class="text-slate-500 block">Discount{% if enrollment.coupon %} ({{ enrollment.coupon.code }}){% endif %}</span>
+                                    <span class="font-bold text-amber-700">- ৳{{ enrollment.applied_discount|floatformat:0 }}</span>
+                                </div>
+                                {% endif %}
+                                <div class="bg-blue-50 rounded-lg px-3 py-2 col-span-{% if enrollment.applied_discount %}1{% else %}2{% endif %}">
+                                    <span class="text-slate-500 block">Total Due</span>
+                                    <span class="font-bold text-blue-700">৳{{ enrollment.total_due|floatformat:0 }}</span>
+                                </div>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-3">Requested: {{ enrollment.request_date|date:"M d, Y" }}</p>
+                            <div class="mt-4 p-3 rounded-lg bg-amber-50 border border-amber-200">
+                                <p class="text-sm text-amber-900 font-medium">⏳ Awaiting admin approval</p>
+                                <p class="text-xs text-amber-700 mt-1">We'll notify you once your enrollment is reviewed.</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Rejected -->
+            {% if rejected_enrollments %}
+            <div>
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-red-100">
+                        <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900">Rejected Enrollments</h2>
+                </div>
+                <div class="grid gap-4 md:grid-cols-2">
+                    {% for enrollment in rejected_enrollments %}
+                    <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden border border-slate-100 hover:border-red-200">
+                        <div class="p-6">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-bold text-slate-900">{{ enrollment.batch.course.title }}</h3>
+                                    <p class="text-sm text-slate-600 mt-1">{{ enrollment.batch.name }}</p>
+                                </div>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">
+                                    Rejected
+                                </span>
+                            </div>
+                            {% if enrollment.rejection_reason %}
+                            <div class="mt-4 p-3 rounded-lg bg-red-50 border border-red-200">
+                                <p class="text-xs text-red-700 font-medium">Reason:</p>
+                                <p class="text-sm text-red-900 mt-1">{{ enrollment.rejection_reason }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if not enrollments %}
+            <div class="bg-white rounded-xl shadow-md border border-slate-100 overflow-hidden">
+                <div class="p-12 text-center">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
+                        <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">No Enrollments Yet</h3>
+                    <p class="text-slate-600 mb-6 max-w-sm mx-auto">You haven't enrolled in any courses on this platform. Explore our available courses and start your learning journey today!</p>
+                    <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                        <a href="{% url 'courses:course_list' %}" class="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C6.248 6.253 2 10.998 2 16.5S6.248 26.75 12 26.75s10-4.745 10-10.25S17.752 6.253 12 6.253z"></path>
+                            </svg>
+                            Browse Courses
+                        </a>
+                        <a href="{% url 'dashboard:student_dashboard' %}" class="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-slate-900 bg-slate-100 hover:bg-slate-200 transition-all">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                            View Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

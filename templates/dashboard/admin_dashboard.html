@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard — Skill Jobs Training{% endblock %}
+
+{% block content %}
+<section class="py-10 bg-gradient-to-br from-slate-50 via-white to-indigo-50 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header -->
+        <div class="mb-10">
+            <h1 class="text-4xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                Admin Dashboard
+            </h1>
+            <p class="text-slate-500 mt-2">Overview of platform activity and quick actions</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid md:grid-cols-4 gap-6 mb-10">
+            <div class="bg-white rounded-2xl shadow-md p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <p class="text-slate-500 text-sm mb-2">Total Courses</p>
+                <p class="text-3xl font-extrabold text-indigo-600">{{ total_courses }}</p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-md p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <p class="text-slate-500 text-sm mb-2">Active Batches</p>
+                <p class="text-3xl font-extrabold text-blue-600">{{ active_batches }}</p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-md p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <p class="text-slate-500 text-sm mb-2">Total Exams</p>
+                <p class="text-3xl font-extrabold text-violet-600">{{ total_exams }}</p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-md p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <p class="text-slate-500 text-sm mb-2">Exam Attempts</p>
+                <p class="text-3xl font-extrabold text-fuchsia-600">{{ total_exam_attempts }}</p>
+            </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-10 mb-10">
+            <!-- Pending Approvals -->
+            <div class="bg-white rounded-2xl shadow-md p-6">
+                <h2 class="text-2xl font-bold mb-6">Pending Approvals</h2>
+
+                {% if pending_approvals %}
+                <div class="space-y-4">
+                    {% for enrollment in pending_approvals %}
+                    <div class="border border-yellow-200 bg-yellow-50 rounded-xl p-5 flex justify-between items-start transition hover:shadow-md">
+                        <div>
+                            <h3 class="font-semibold text-slate-800 text-sm">
+                                {{ enrollment.student.get_full_name|default:enrollment.student.username }}
+                            </h3>
+                            <p class="text-slate-500 text-[10px] uppercase font-bold tracking-wider mt-1">
+                                {{ enrollment.batch.course.title }}
+                            </p>
+                        </div>
+
+                        <a href="{% url 'admin:enrollments_enrollment_change' enrollment.id %}"
+                            class="px-3 py-1 rounded-lg text-xs font-bold bg-indigo-600 text-white hover:bg-indigo-500 transition">
+                            Details
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-slate-500">No pending approvals.</p>
+                {% endif %}
+            </div>
+
+            <!-- Recent Exam Activity -->
+            <div class="bg-white rounded-2xl shadow-md p-6">
+                <h2 class="text-2xl font-bold mb-6">Recent Exam Activity</h2>
+
+                {% if recent_attempts %}
+                <div class="space-y-4">
+                    {% for attempt in recent_attempts %}
+                    <div class="border border-slate-100 bg-slate-50 rounded-xl p-5 flex justify-between items-start transition hover:shadow-md">
+                        <div>
+                            <h3 class="font-semibold text-slate-800 text-sm">
+                                {{ attempt.user.get_full_name|default:attempt.user.username }}
+                            </h3>
+                            <p class="text-slate-500 text-[10px] uppercase font-bold tracking-wider mt-1">
+                                {{ attempt.exam.title }} · Score: {{ attempt.score|floatformat:0 }}
+                            </p>
+                        </div>
+
+                        <span class="text-[10px] font-bold text-slate-400 mt-1">
+                            {{ attempt.completed_at|timesince }} ago
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-slate-500">No exam attempts yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Bottom Sections -->
+        <div class="grid md:grid-cols-3 gap-6">
+
+            <!-- Quick Links -->
+            <div class="bg-white rounded-2xl shadow-md p-6 hover:shadow-lg transition">
+                <h2 class="text-xl font-bold mb-3">Quick Links</h2>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="/admin/" class="text-indigo-600 font-medium hover:underline">System Admin</a></li>
+                    <li><a href="{% url 'courses:course_list' %}" class="text-indigo-600 font-medium hover:underline">Course List</a></li>
+                    <li><a href="{% url 'admin:accounts_customuser_changelist' %}" class="text-indigo-600 font-medium hover:underline">Manage Users</a></li>
+                </ul>
+            </div>
+
+            <!-- Overview -->
+            <div class="bg-white rounded-2xl shadow-md p-6 hover:shadow-lg transition">
+                <h2 class="text-xl font-bold mb-3">System Overview</h2>
+                <p class="text-slate-500 text-sm">
+                    Use the Django admin panel for detailed analytics, reports, and configurations.
+                </p>
+            </div>
+
+            <!-- Notifications -->
+            <div class="bg-white rounded-2xl shadow-md p-6 hover:shadow-lg transition">
+                <h2 class="text-xl font-bold mb-3">Notifications</h2>
+                <p class="text-slate-500 text-sm">No new system notifications.</p>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+{% endblock %}

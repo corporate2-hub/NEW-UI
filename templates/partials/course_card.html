@@ -1,0 +1,64 @@
+<a href="{% url 'courses:course_detail' slug=course.slug %}" class="group flex flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-slate-200/60 sm:rounded-3xl h-full">
+
+    <div class="relative aspect-[16/10] overflow-hidden bg-slate-100">
+        {% if course.banner_image %}
+            <img src="{{ course.banner_image.url }}"
+                 alt="{{ course.title }}"
+                 class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                 loading="lazy">
+        {% else %}
+            <div class="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand-secondary via-brand-primary to-cyan-500 px-4">
+                <p class="text-center text-sm font-black text-white/60">{{ course.title|truncatechars:30 }}</p>
+            </div>
+        {% endif %}
+
+        <span class="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide text-slate-700 shadow-sm backdrop-blur-sm sm:text-xs sm:px-3">
+            {{ course.get_level_display }}
+        </span>
+    </div>
+
+    <div class="flex flex-1 flex-col p-4 sm:p-5">
+        {% if course.category %}
+        <p class="text-[10px] font-bold uppercase tracking-widest text-brand-primary sm:text-xs">
+            {{ course.category.name }}
+        </p>
+        {% endif %}
+
+        <h3 class="mt-1.5 text-sm font-black leading-snug text-slate-950 line-clamp-2 sm:text-base">
+            {{ course.title }}
+        </h3>
+
+        {% if course.description %}
+        <div class="mt-2 text-xs text-slate-500 line-clamp-3 sm:text-sm leading-relaxed">
+            {{ course.description|striptags }}
+        </div>
+        {% endif %}
+
+
+        <div class="mt-auto pt-4">
+            <div class="flex items-center gap-3 text-[10px] font-semibold text-slate-400 sm:text-xs">
+                <span class="inline-flex items-center gap-1">
+                    <svg class="h-3 w-3 sm:h-3.5 sm:w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    {{ course.duration_hours }}h
+                </span>
+                <span class="inline-flex items-center gap-1">
+                    <svg class="h-3 w-3 sm:h-3.5 sm:w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                    {{ course.sections.count }} modules
+                </span>
+            </div>
+
+            <div class="mt-3 flex items-center justify-between border-t border-slate-100 pt-3">
+                {% if course.price %}
+                    <p class="text-base font-black text-slate-950 sm:text-lg">&#2547;{{ course.price|floatformat:0 }}</p>
+                {% else %}
+                    <p class="text-base font-black text-emerald-600 sm:text-lg">Free</p>
+                {% endif %}
+
+                <span class="inline-flex items-center gap-1 text-xs font-extrabold text-brand-primary transition group-hover:gap-2 sm:text-sm">
+                    View Details
+                    <svg class="h-3.5 w-3.5 transition group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                </span>
+            </div>
+        </div>
+    </div>
+</a>

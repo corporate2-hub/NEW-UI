@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Attendance Summary — {{ batch.name }}{% endblock %}
+
+{% block content %}
+<section class="py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <h1 class="text-3xl font-bold mb-6">Attendance Summary — {{ batch.name }}</h1>
+
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+      <h2 class="text-xl font-bold mb-4">Batch Classes</h2>
+      {% with classes=batch.class_sessions.all %}
+        {% if classes %}
+          <div class="space-y-3">
+            {% for cls in classes %}
+              <div class="flex items-center justify-between border p-3 rounded">
+                <div>
+                  <div class="font-bold">{{ cls.title }}</div>
+                  <div class="text-sm text-slate-600">{{ cls.scheduled_date }} at {{ cls.scheduled_time }}</div>
+                </div>
+                <div>
+                  <a href="{% url 'attendance:mark_attendance' class_id=cls.id %}" class="px-3 py-2 rounded bg-dark-50 hover:bg-dark-100">Take Attendance</a>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-slate-600">No classes scheduled for this batch.</p>
+        {% endif %}
+      {% endwith %}
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-xl font-bold mb-4">Student Summary</h2>
+      {% if summary_data %}
+      <div class="space-y-3">
+        {% for row in summary_data %}
+        <div class="border p-4 rounded flex items-center justify-between">
+          <div>
+            <div class="font-bold">{{ row.student.get_full_name|default:row.student.username }}</div>
+            <div class="text-sm text-slate-600">Present: {{ row.summary.present }} | Absent: {{ row.summary.absent }} | Late: {{ row.summary.late }} | Total: {{ row.summary.total }}</div>
+          </div>
+          <div class="text-right">
+            <div class="text-sm text-slate-600">Attendance: {{ row.summary.percentage }}%</div>
+            {% if user.is_staff %}
+              <a href="{% url 'admin:accounts_customuser_change' row.student.id %}" class="mt-2 inline-block text-sm text-blue-600">View Profile</a>
+            {% else %}
+              <span class="mt-2 inline-block text-sm text-slate-600">Profile unavailable</span>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+        <p class="text-slate-600">No approved students found for this batch.</p>
+      {% endif %}
+    </div>
+
+  </div>
+</section>
+{% endblock %}

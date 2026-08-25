@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Enrollment Request</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f7f6; color: #333; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .header { background-color: #f39c12; color: #ffffff; padding: 30px 20px; text-align: center; }
+        .header h1 { margin: 0; font-size: 24px; font-weight: 600; }
+        .content { padding: 30px 40px; line-height: 1.6; }
+        .content p { margin: 0 0 15px; }
+        .details-box { background-color: #fffaf0; border-left: 4px solid #f39c12; padding: 15px 20px; margin: 25px 0; border-radius: 4px; }
+        .details-box p { margin: 5px 0; font-size: 15px; }
+        .footer { background-color: #f4f7f6; text-align: center; padding: 20px; font-size: 13px; color: #777; border-top: 1px solid #eeeeee; }
+        .btn { display: inline-block; background-color: #f39c12; color: #ffffff; text-decoration: none; padding: 12px 25px; border-radius: 4px; font-weight: bold; margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>New Enrollment Request</h1>
+        </div>
+        <div class="content">
+            <p>Hello Admin,</p>
+            <p>A new enrollment request has been submitted and is waiting for your approval.</p>
+            
+            <div class="details-box">
+                <p><strong>Student:</strong> {{ student_name }} ({{ student_email }})</p>
+                <p><strong>Course:</strong> {{ course_name }}</p>
+                <p><strong>Batch:</strong> {{ batch_name }}</p>
+                <p><strong>Date Requested:</strong> {{ request_date }}</p>
+            </div>
+            
+            <p>Please log in to the admin dashboard to review and approve this request.</p>
+            
+            <center>
+                <a href="{{ admin_url }}" class="btn">Go to Dashboard</a>
+            </center>
+        </div>
+        <div class="footer">
+            <p>&copy; {{ current_year }} {{ company_name }}. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

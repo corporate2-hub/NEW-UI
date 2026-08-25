@@ -1,0 +1,90 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static %}
+
+{% block breadcrumbs %}
+<div class="px-4 py-3 border-b border-gray-200 dark:border-gray-800">
+    <nav class="flex text-sm text-gray-500 dark:text-gray-400" aria-label="Breadcrumb">
+        <ol class="flex items-center space-x-2">
+            <li><a href="{% url 'admin:index' %}" class="hover:text-primary-600">{% trans 'Home' %}</a></li>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            <li><a href="{% url 'admin:app_list' app_label=opts.app_label %}" class="hover:text-primary-600">{{ opts.app_config.verbose_name }}</a></li>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0(9 5l7 7-7 7"></path></svg>
+            <li><a href="{% url 'admin:exams_question_changelist' %}" class="hover:text-primary-600">{{ opts.verbose_name_plural|capfirst }}</a></li>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            <li class="font-bold text-gray-900 dark:text-gray-100">Import Excel</li>
+        </ol>
+    </nav>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-4xl mx-auto">
+    <div class="bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+        <div class="bg-primary-600 p-6">
+            <h1 class="text-2xl font-bold text-white flex items-center gap-3">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Import Questions from Excel
+            </h1>
+            <p class="text-primary-100 mt-2">Upload an Excel file to bulk create MCQ questions.</p>
+        </div>
+
+        <div class="p-8">
+            <div class="mb-8 p-4 bg-blue-50 border-l-4 border-blue-500 text-blue-700">
+                <h3 class="font-bold mb-2">Instructions:</h3>
+                <ul class="list-disc list-inside text-sm space-y-1">
+                    <li>The Excel file must have headers in the first row.</li>
+                    <li><strong>Column A:</strong> Question Text</li>
+                    <li><strong>Column B:</strong> Option A</li>
+                    <li><strong>Column C:</strong> Option B</li>
+                    <li><strong>Column D:</strong> Option C</li>
+                    <li><strong>Column E:</strong> Option D</li>
+                    <li><strong>Column F:</strong> Correct Option (A, B, C, or D)</li>
+                    <li>Maximum <strong>30 questions</strong> per upload.</li>
+                </ul>
+            </div>
+
+            <form action="." method="post" enctype="multipart/form-data" class="space-y-6">
+                {% csrf_token %}
+                
+                {% for field in form %}
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                    <p class="text-xs text-gray-500 mt-1">{{ field.help_text }}</p>
+                    {% endif %}
+                    {% if field.errors %}
+                    <p class="text-xs text-red-500 mt-1">{{ field.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                <div class="pt-6 border-t border-gray-100 dark:border-gray-800 flex justify-end gap-4">
+                    <a href="{% url 'admin:exams_question_changelist' %}" class="px-6 py-2 rounded-lg font-bold text-gray-600 hover:bg-gray-100 transition-all">Cancel</a>
+                    <button type="submit" class="px-8 py-2 rounded-lg font-bold text-white bg-primary-600 hover:bg-primary-700 transition-all shadow-lg hover:shadow-xl">
+                        Start Import
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Style for file input and select in Unfold */
+    input[type="file"], select {
+        width: 100% !important;
+        padding: 0.75rem !important;
+        border: 1px solid #d1d5db !important;
+        border-radius: 0.5rem !important;
+        background: #f9fafb !important;
+    }
+    .dark input[type="file"], .dark select {
+        background: #1f2937 !important;
+        border-color: #374151 !important;
+        color: white !important;
+    }
+</style>
+{% endblock %}

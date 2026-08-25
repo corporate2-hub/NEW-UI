@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Profile — {{ company.meta_title|default:company.name|default:"Skill Jobs Training" }}{% endblock %}
+
+{% block content %}
+<section class="py-12">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 class="text-4xl font-bold mb-8 grad-text">My Profile</h1>
+        
+        <div class="bg-white rounded-lg shadow p-8">
+            <div class="text-center mb-8">
+                {% if user.profile_image %}
+                <img src="{{ user.profile_image.url }}" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover">
+                {% else %}
+                <div class="w-24 h-24 rounded-full mx-auto mb-4 bg-dark-100 flex items-center justify-center">
+                    <span class="text-4xl text-dark-600 font-bold">{{ user.first_name|first }}{{ user.last_name|first }}</span>
+                </div>
+                {% endif %}
+                <h2 class="text-2xl font-bold">{{ user.get_full_name }}</h2>
+                <p class="text-slate-600">@{{ user.username }}</p>
+            </div>
+            
+            <div class="space-y-4 mb-8">
+                <div>
+                    <p class="text-sm text-slate-600">Email</p>
+                    <p class="font-semibold">{{ user.email }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-slate-600">Phone</p>
+                    <p class="font-semibold">{{ user.phone|default:"Not provided" }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-slate-600">Role</p>
+                    <p class="font-semibold">{{ user.get_role_display }}</p>
+                </div>
+            </div>
+            
+            <a href="{% url 'accounts:edit_profile' %}" class="px-8 py-3 rounded-full font-bold text-white bg-gradient-to-r from-dark-500 to-purple-500 hover:from-dark-400 hover:to-purple-400 transition-all inline-block">
+                Edit Profile
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

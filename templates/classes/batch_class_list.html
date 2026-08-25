@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+
+{% block title %}Classes — {{ batch.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .sj-grid-bg{
+        background-image:
+            linear-gradient(rgba(15,23,42,.06) 1px,transparent 1px),
+            linear-gradient(90deg,rgba(15,23,42,.06) 1px,transparent 1px);
+        background-size:36px 36px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<section class="relative min-h-screen bg-white py-12 overflow-x-hidden">
+    <!-- GRID BACKGROUND -->
+    
+
+    <!-- GRADIENT BLOBS -->
+    <div class="absolute -left-40 top-10 h-96 w-96 rounded-full bg-blue-500/10 blur-3xl"></div>
+    <div class="absolute -right-40 top-24 h-96 w-96 rounded-full bg-violet-500/10 blur-3xl"></div>
+
+    <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
+        <!-- Breadcrumbs -->
+        <nav class="text-sm text-slate-500 mb-4" aria-label="Breadcrumb">
+            <ol class="flex items-center gap-2">
+                <li><a href="{% url 'core:home' %}" class="hover:underline">Home</a></li>
+                <li>•</li>
+                <li><a href="{% url 'dashboard:student_dashboard' %}" class="hover:underline">Dashboard</a></li>
+                <li>•</li>
+                <li><a href="{% url 'enrollments:my_enrollments' %}" class="hover:underline">My Enrollments</a></li>
+                <li>•</li>
+                <li class="font-semibold text-slate-700">{{ batch.name }}</li>
+            </ol>
+        </nav>
+
+        <!-- HEADER -->
+        <div class="mb-10">
+            <h1 class="text-3xl font-black text-slate-950 sm:text-4xl">
+                {{ batch.course.title }}
+            </h1>
+
+            <p class="mt-2 text-sm text-slate-600">
+                Batch: <strong>{{ batch.name }}</strong>
+                {% with instructors=batch.instructors.all %}
+                    {% if instructors %}
+                        • Instructor: <strong>
+                            {% for inst in instructors %}
+                                {{ inst.get_full_name }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </strong>
+                    {% endif %}
+                {% endwith %}
+            </p>
+        </div>
+
+        <!-- ATTENDANCE SUMMARY (students only) -->
+        {% if attendance_summary %}
+        <div class="mb-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/60 sm:p-8">
+            <h2 class="text-lg font-black text-slate-900 mb-4">📊 My Attendance</h2>
+            <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                <div class="rounded-2xl bg-slate-50 border border-slate-100 p-4 text-center">
+                    <p class="text-2xl font-black text-slate-900">{{ attendance_summary.total }}</p>
+                    <p class="mt-1 text-xs font-semibold text-slate-500 uppercase tracking-wide">Total Sessions</p>
+                </div>
+                <div class="rounded-2xl bg-emerald-50 border border-emerald-100 p-4 text-center">
+                    <p class="text-2xl font-black text-emerald-700">{{ attendance_summary.present }}</p>
+                    <p class="mt-1 text-xs font-semibold text-emerald-600 uppercase tracking-wide">Present</p>
+                </div>
+                <div class="rounded-2xl bg-amber-50 border border-amber-100 p-4 text-center">
+                    <p class="text-2xl font-black text-amber-700">{{ attendance_summary.late }}</p>
+                    <p class="mt-1 text-xs font-semibold text-amber-600 uppercase tracking-wide">Late</p>
+                </div>
+                <div class="rounded-2xl bg-red-50 border border-red-100 p-4 text-center">
+                    <p class="text-2xl font-black text-red-700">{{ attendance_summary.absent }}</p>
+                    <p class="mt-1 text-xs font-semibold text-red-600 uppercase tracking-wide">Absent</p>
+                </div>
+            </div>
+            <!-- Attendance percentage bar -->
+            <div class="mt-4">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-sm font-semibold text-slate-600">Attendance Rate</span>
+                    <span class="text-sm font-black
+                        {% if attendance_summary.percentage >= 75 %}text-emerald-700
+                        {% elif attendance_summary.percentage >= 50 %}text-amber-700
+                        {% else %}text-red-700{% endif %}">{{ attendance_summary.percentage }}%</span>
+                </div>
+                <div class="h-3 w-full rounded-full bg-slate-100">
+                    <div class="h-3 rounded-full
+                        {% if attendance_summary.percentage >= 75 %}bg-emerald-500
+                        {% elif attendance_summary.percentage >= 50 %}bg-amber-500
+                        {% else %}bg-red-500{% endif %}"
+                         style="width: {{ attendance_summary.percentage }}%"></div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="space-y-10">
+
+            <!-- ================= UPCOMING ================= -->
+            {% if upcoming_classes %}
+            <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/60 sm:p-8">
+
+                <div class="mb-6 flex items-center justify-between">
+                    <h2 class="text-xl font-black text-slate-900 sm:text-2xl">
+                        🚀 Upcoming Classes
+                    </h2>
+                </div>
+
+                <div class="space-y-4">
+
+                    {% for class in upcoming_classes %}
+                    <div class="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/70">
+
+                        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+                            <div>
+                                <h3 class="text-lg font-black text-slate-900">
+                                    {{ class.title }}
+                                </h3>
+
+                                <p class="mt-1 text-sm text-slate-600">
+                                    {{ class.topic }}
+                                </p>
+
+                                <p class="mt-2 text-xs font-semibold text-slate-500">
+                                    📅 {{ class.scheduled_date|date:"M d, Y" }} — {{ class.scheduled_time }}
+                                </p>
+                            </div>
+
+                            <a href="{% url 'classes:class_detail' class_id=class.id %}"
+                               class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg transition hover:-translate-y-0.5">
+                                Join Class
+                            </a>
+
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- ================= PAST ================= -->
+            {% if past_classes %}
+            <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/60 sm:p-8">
+
+                <div class="mb-6">
+                    <h2 class="text-xl font-black text-slate-900 sm:text-2xl">
+                        🎬 Past Classes
+                    </h2>
+                </div>
+
+                <div class="space-y-4">
+
+                    {% for class in past_classes %}
+                    <div class="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/70">
+
+                        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+                            <div>
+                                <h3 class="text-lg font-black text-slate-900">
+                                    {{ class.title }}
+                                </h3>
+
+                                <p class="mt-1 text-sm text-slate-600">
+                                    {{ class.topic }}
+                                </p>
+
+                                <p class="mt-2 text-xs font-semibold text-slate-500">
+                                    📅 {{ class.scheduled_date|date:"M d, Y" }} — {{ class.scheduled_time }}
+                                </p>
+
+                                {% if class.recording_link %}
+                                <a href="{{ class.recording_link }}" target="_blank"
+                                   class="mt-2 inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:underline">
+                                    ▶ Recording Available
+                                </a>
+                                {% else %}
+                                <p class="mt-2 text-xs text-slate-400">
+                                    Recording coming soon
+                                </p>
+                                {% endif %}
+
+                                {% if attendance_summary %}
+                                <div class="mt-2">
+                                    {% if class.my_status == 'present' %}
+                                        <span class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-0.5 text-xs font-bold text-emerald-700">✅ Present</span>
+                                    {% elif class.my_status == 'late' %}
+                                        <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-0.5 text-xs font-bold text-amber-700">⏰ Late</span>
+                                    {% elif class.my_status == 'absent' %}
+                                        <span class="inline-flex items-center gap-1 rounded-full bg-red-100 px-3 py-0.5 text-xs font-bold text-red-700">❌ Absent</span>
+                                    {% else %}
+                                        <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-0.5 text-xs font-semibold text-slate-500">— Not recorded</span>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <a href="{% url 'classes:class_detail' class_id=class.id %}"
+                               class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 px-5 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50">
+                                View Details
+                            </a>
+
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                </div>
+            </div>
+            {% endif %}
+
+            {# Empty state: show a friendly message when there are no classes #}
+            {% if not upcoming_classes and not past_classes %}
+            <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/60 sm:p-8">
+                <div class="text-center py-12">
+                    <h2 class="text-xl font-black text-slate-900 sm:text-2xl">No classes scheduled yet</h2>
+                    <p class="mt-3 text-sm text-slate-600">There are currently no classes for this batch. Check back later or contact the instructor for updates.</p>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}
